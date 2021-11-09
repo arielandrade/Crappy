@@ -1,0 +1,10 @@
+[
+	{
+		"type": "Randomness",
+		"name": "randomness",
+		"value": 1,
+		"minimum": 0,
+		"maximum": 1000,
+		"default": 1
+	}
+]
