@@ -346,13 +346,10 @@ namespace Crappy.UCI
 
         private void Log(string line)
         {
-            //por alguna razón, me empezó a tirar "System.UnauthorizedAccessException: Access to the path is denied" a veces
-            /*
             lock (logLock)
             {
                 File.AppendAllLines(LogFileName, new[] { line });
             }
-            */
         }
 
         public void Loop()
@@ -379,11 +376,6 @@ namespace Crappy.UCI
 
                 case "board":
                     return GetASCIIBoard();
-
-                /*
-                case "scoremoves":
-                    return ListMovesScores(CurrentPosition);
-                */
 
                 case "flatscore":
                     return GetFlatScore(parameters[1]);
@@ -429,19 +421,6 @@ namespace Crappy.UCI
             else
                 throw new FileNotFoundException($"File '{fileName}' not found");
         }
-
-        /*
-        private string[] ListMovesScores(Position position)
-        {            
-            return 
-                position.
-                GetLegalMoves().
-                AsParallel().
-                Select(x => (move: x, score: Engine.AlphaBetaEvaluation(CurrentPosition.PlayMove(x)))).
-                OrderByDescending(x => x.score * CurrentPosition.SideToMove.Sign()).
-                Select((x, i) => $"{i}: {x.move} = {x.score}").
-                ToArray();
-        }*/
 
         private string[] GetFlatScore(string parameter)
         {

@@ -125,8 +125,7 @@ namespace Crappy
             IEnumerable<(Move move, decimal score)> candidateMoves = rankedMoves.
                 TakeWhile(x => Math.Abs(bestMove.score - x.score) <= randomness);
 
-            WriteInfo($"Best ranked move: {bestMove}");          
-            WriteInfo($"Randomness: {randomness}");
+            WriteInfo($"Best ranked move: {bestMove}");
             WriteInfo("Ranked moves:");
 
             foreach((Move move, decimal score) item in rankedMoves)

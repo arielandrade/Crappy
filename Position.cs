@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using Crappy.Pieces;
@@ -8,7 +7,6 @@ namespace Crappy
 {
     /// <summary>
     /// Represent a position of a chess game and provide methods to query its legal moves.
-    /// legal moves
     /// </summary>
     public class Position
     {
