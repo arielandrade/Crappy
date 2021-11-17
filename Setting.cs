@@ -2,11 +2,11 @@
 {
     public class Setting
     {
-        public SettingType Type { get; set; }
-        public string Name { get; set; }
-        public int Value { get; set; }
-        public int Minimum { get; set; }
-        public int Maximum { get; set; }
-        public int Default { get; set; }
+        public SettingType SettingType { get; set; }
+        public OptionType OptionType { get; set; }
+        public string Value { get; set; }
+        public int? Minimum { get; set; }
+        public int? Maximum { get; set; }
+        public string Default { get; set; }
     }
 }

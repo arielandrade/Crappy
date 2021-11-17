@@ -3,30 +3,6 @@
     public enum SettingType
     {
         Randomness,
-        OpeningMovesCount,
-        EndgameStartMaterialThreshold,
-        MobilityBonusPerSquare,
-        CheckBonus,
-        CastleOpeningBonus,
-        CastleMiddlegameBonus,
-        CastleEndgameBonus,
-        PawnPushOpeningBonus,
-        PawnPushMiddlegameBonus,
-        PawnPushEndgameBonus,
-        KnightMoveOpeningBonus,
-        KnightMoveMiddlegameBonus,
-        KnightMoveEndgameBonus,
-        BishopMoveOpeningBonus,
-        BishopMoveMiddlegameBonus,
-        BishopMoveEndgameBonus,
-        RookMoveOpeningBonus,
-        RookMoveMiddlegameBonus,
-        RookMoveEndgameBonus,
-        QueenMoveOpeningBonus,
-        QueenMoveMiddlegameBonus,
-        QueenMoveEndgameBonus,
-        KingMoveOpeningBonus,
-        KingMoveMiddlegameBonus,
-        KingMoveEndgameBonus
+        LogToFile
     }
 }

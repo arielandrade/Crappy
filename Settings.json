@@ -1,10 +1,18 @@
 [
 	{
-		"type": "Randomness",
+		"settingtype": "Randomness",
 		"name": "randomness",
+		"optiontype": "Spin",
 		"value": 1,
 		"minimum": 0,
 		"maximum": 1000,
 		"default": 1
+	},
+	{
+		"settingtype": "LogToFile",
+		"name": "logtofile",
+		"optiontype": "Check",
+		"value": "false",
+		"default": "false"
 	}
 ]

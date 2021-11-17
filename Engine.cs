@@ -19,13 +19,6 @@ namespace Crappy
         private int EvaluationCount;
         private int FlatEvaluationCount;
         
-        private Configuration _configuration;
-        public Configuration Configuration 
-        { 
-            get => _configuration ?? throw new NullReferenceException("No configuration set");
-            set { _configuration = value; }
-        }
-
         private Book _book;
         public Book Book
         {
@@ -104,7 +97,7 @@ namespace Crappy
         {
             decimal alpha = -MAX_SCORE;
             decimal beta = MAX_SCORE;
-            decimal randomness = Configuration.Settings[SettingType.Randomness].Value / 100M;
+            decimal randomness = Configuration.Get().GetValue<int>(SettingType.Randomness) / 100M;
 
             (Move move, decimal score)[] rankedMoves = moves.
                 AsParallel().

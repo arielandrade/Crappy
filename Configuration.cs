@@ -7,37 +7,64 @@ namespace Crappy
 {   
     public class Configuration
     {
-        public readonly Dictionary<SettingType, Setting> Settings = new Dictionary<SettingType, Setting>();
-        private readonly string fileName;
-
-        public Configuration(string fileName)
+        private static Configuration _instance;
+        public static Configuration Get()
         {
-            this.fileName = fileName;
-            Load();
+            if (_instance is null)
+            {
+                _instance = new Configuration();
+            }
+
+            return _instance;
         }
 
-        ~Configuration() => Save();
+        public readonly Dictionary<SettingType, Setting> Settings = new Dictionary<SettingType, Setting>();
+        private string _fileName;
+        public string FileName 
+        {
+            get => _fileName;
+            set 
+            {
+                _fileName = value;
+                Load();
+            }
+        }
 
-        //Falta hacer un GetSetting porque estoy entrando al diccionario derecho
+        private Configuration(){}
+
+        ~Configuration() => Save();
+       
+        public T GetValue<T>(SettingType type)
+        {
+            if (Settings.TryGetValue(type, out Setting setting))
+            {
+                try
+                {
+                    return (T)Convert.ChangeType(setting.Value, typeof(T));
+                }
+                catch(Exception ex)
+                {
+                    throw new ArgumentException($"Error coverting setting {setting.SettingType} to {typeof(T)}", ex);
+                }
+            }
+            else
+            {
+                throw new ArgumentException($"Setting not found: {type}");
+            }
+        }
 
         private void Load()
         {
+            Settings.Clear();
             LoadDefaultSettings();
             LoadSavedSettings();
         }
 
-		private void AddSetting(Setting setting)
-        {
-            Settings.Add(setting.Type, setting);
-        }
-
         private void LoadDefaultSettings()
         {
-            Settings.Clear();
-
             foreach (Setting setting in GetDefaultSettings())
             {
-                AddSetting(setting);
+                Settings.Add(setting.SettingType, setting);
             }
         }
 
@@ -47,12 +74,19 @@ namespace Crappy
             {
                 new Setting 
                 { 
-                    Type = SettingType.Randomness,
-                    Name = "randomness",
-                    Value = 1,
+                    SettingType = SettingType.Randomness,
+                    OptionType = OptionType.Spin,
+                    Value = "1",
                     Minimum = 0,
                     Maximum = 1000,
-                    Default = 1
+                    Default = "1"
+                },
+                new Setting
+                {
+                    SettingType = SettingType.LogToFile,
+                    OptionType = OptionType.Check,
+                    Value = "false",
+                    Default = "false"
                 }
             };
         }
@@ -60,9 +94,9 @@ namespace Crappy
         /// Los settings del archivo tienen que estar dentro de los defaults
         private void LoadSavedSettings()
         {
-            if (File.Exists(fileName))
+            if (File.Exists(_fileName))
             {
-                string fileContent = File.ReadAllText(fileName);
+                string fileContent = File.ReadAllText(_fileName);
                 
                 try
                 {               
@@ -70,22 +104,29 @@ namespace Crappy
 
                     foreach(Setting setting in settings)
                     {
-                        if (Settings.ContainsKey(setting.Type))
+                        if (Settings.ContainsKey(setting.SettingType))
                         {
-                            Settings[setting.Type] = setting;
+                            Settings[setting.SettingType] = setting;
                         }
                     }
                 }
                 catch(Exception ex)
                 {                   
-                    throw new FileLoadException($"Error loading settings file {fileName}", ex);
+                    throw new FileLoadException($"Error loading settings file {_fileName}", ex);
                 }
             }
         }
 
         public void Save()
         {
-            File.WriteAllText(fileName, JsonConvert.SerializeObject(Settings.Values));
+            try
+            {
+                File.WriteAllText(_fileName, JsonConvert.SerializeObject(Settings.Values));
+            }
+            catch(Exception ex)
+            {
+                throw new Exception($"Error saving configuration file '{_fileName}'", ex);
+            }
         }
     }
 }
