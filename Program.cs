@@ -12,15 +12,14 @@ namespace Crappy
         {
             Console.WriteLine("Crappy started.");
 
-            var configuration = new Configuration("Settings.json");
-            var book = new Book("Book.json");
-            var engine = new Engine
-            {
-                Configuration = configuration,
-                Book = book
-            };
+            var configuration = Configuration.Get();
+            configuration.FileName = "Settings.json";
 
-            new UCIHandler(engine).Loop();
+            var engine = new Engine { Book = new Book("Book.json") };
+
+            var uci = new UCIHandler { Engine = engine };
+
+            uci.Loop();
         }
     }
 }

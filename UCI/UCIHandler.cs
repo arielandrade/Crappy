@@ -41,12 +41,6 @@ namespace Crappy.UCI
 
         private readonly string LogFileName = $@"./log/uci{DateTime.Now.ToString("yyyyMMddhhmmssff")}.log";
 
-        public UCIHandler(Engine engine)
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(LogFileName));
-            Engine = engine;
-        }
-
         public string[] ProcessCommand(string input)
         {
             if (string.IsNullOrWhiteSpace(input))
@@ -99,13 +93,23 @@ namespace Crappy.UCI
         {
             IEnumerable<string> GetOptions()
             {
-                foreach (Setting setting in Engine.Configuration.Settings.Values)
+                foreach (Setting setting in Configuration.Get().Settings.Values)
                 {
-                    yield return
-                        $"option name {setting.Name} " +
-                        $"type spin default {setting.Default} " +
-                        $"min {setting.Minimum} " +
-                        $"max {setting.Maximum}";
+                    string item = 
+                        $"option name {setting.SettingType.ToString()} " + 
+                        $"type {setting.OptionType.ToString().ToLower()} default {setting.Default} ";
+
+                    if (setting.Minimum != null) 
+                    {
+                        item += $"min {setting.Minimum} ";
+                    }
+
+                    if (setting.Maximum != null) 
+                    {
+                        item += $"max {setting.Maximum} ";
+                    }
+
+                    yield return item;
                 }
             }
 
@@ -250,25 +254,20 @@ namespace Crappy.UCI
             {
                 try
                 {
-                    Setting setting = Engine.Configuration.Settings.Values.SingleOrDefault(x => x.Name == settingName);
+                    Setting setting = Configuration.Get().Settings.Values.SingleOrDefault(x => x.SettingType.ToString() == settingName);
 
                     if (setting is null)
                     {
                         return new[] { $"info string Unknown option: {settingName}" };
                     }
 
-                    if (!int.TryParse(settingValue, out int value))
-                    {
-                        value = 0;
-                    }
+                    setting.Value = settingValue;
 
-                    setting.Value = value;
-
-                    return new string[] { $"info string {settingName} set to {value}" };
+                    return new string[] { $"info string {settingName} set to {settingValue}" };
                 }
                 finally
                 {
-                    Engine.Configuration.Save();
+                    Configuration.Get().Save();
                 }
             }
             catch (Exception ex)
@@ -342,13 +341,29 @@ namespace Crappy.UCI
             }            
         }
 
-        private readonly object logLock = new object();
-
+        private bool? _logToFile;
+        private readonly object _logLock = new object();
+        private bool _logDirectoryCreated = false;
+       
         private void Log(string line)
         {
-            lock (logLock)
+            if (_logToFile is null)
             {
-                File.AppendAllLines(LogFileName, new[] { line });
+                _logToFile = Configuration.Get().GetValue<bool>(SettingType.LogToFile);
+            }
+
+            if (_logToFile.Value)
+            {
+                lock (_logLock)
+                {
+                    if (!_logDirectoryCreated)
+                    {
+                        Directory.CreateDirectory(Path.GetDirectoryName(LogFileName));
+                        _logDirectoryCreated = true;
+                    }
+
+                    File.AppendAllLines(LogFileName, new[] { line });
+                }
             }
         }
 
