@@ -99,24 +99,24 @@ namespace Crappy
             decimal beta = MAX_SCORE;
             decimal randomness = Configuration.Get().GetValue<int>(SettingType.Randomness) / 100M;
 
-            (Move move, decimal score)[] rankedMoves = moves.
+            IEnumerable<(Move move, decimal score)> rankedMoves = moves.
                 AsParallel().
                 Select(
                     x => 
                     {
                         Position newPosition = position.PlayMove(x);
-                        BoardCoordinates captureTarget = x.IsCapture(position) ? x.Targets.First().Coordinates : null;
-                        decimal evaluation = -Evaluate(newPosition, depth, captureTarget, positionHistory, -beta, -alpha);
+                        decimal evaluation = -Evaluate(newPosition, depth, positionHistory, -beta, -alpha);
 
                         return (move: x, score: evaluation);
                     }).
-                OrderByDescending(x => x.score).
-                ToArray();
+                ToList().
+                OrderByDescending(x => x.score);
            
             (Move move, decimal score) bestMove = rankedMoves.First();
 
-            IEnumerable<(Move move, decimal score)> candidateMoves = rankedMoves.
-                TakeWhile(x => Math.Abs(bestMove.score - x.score) <= randomness);
+            List<(Move move, decimal score)> candidateMoves = rankedMoves.
+                TakeWhile(x => Math.Abs(bestMove.score - x.score) <= randomness).
+                ToList();
 
             WriteInfo($"Best ranked move: {bestMove}");
             WriteInfo("Ranked moves:");
@@ -167,7 +167,6 @@ namespace Crappy
         public decimal Evaluate(
             Position position, 
             int depth, 
-            BoardCoordinates captureTarget, 
             IEnumerable<string> positionHistory, 
             decimal alpha, 
             decimal beta)
@@ -203,8 +202,7 @@ namespace Crappy
                 {
                     Position newPosition = position.PlayMove(move);
 
-                    captureTarget = move.IsCapture(position) ? move.Targets.First().Coordinates : null;
-                    decimal evaluation = -Evaluate(newPosition, depth, captureTarget, positionHistory, -beta, -alpha);
+                    decimal evaluation = -Evaluate(newPosition, depth, positionHistory, -beta, -alpha);
 
                     result = Math.Max(result, evaluation);
                     alpha = Math.Max(result, alpha);

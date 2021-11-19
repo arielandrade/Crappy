@@ -4,6 +4,7 @@ namespace Crappy.Pieces
 {
     public class Rook : Piece
     {
+        internal Rook(){}
         public static IEnumerable<(int x, int y)> Directions = new[]
         {
             (0, 1), //Up

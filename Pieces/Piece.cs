@@ -9,7 +9,32 @@ namespace Crappy.Pieces
     /// </summary>
     public abstract class Piece
     {
+        #region Static
+        private static readonly IEnumerable<Piece> _collection = new List<Piece>
+        {
+            new Pawn{ Color = PieceColor.White },
+            new Knight{ Color = PieceColor.White },
+            new Bishop{ Color = PieceColor.White },
+            new Rook{ Color = PieceColor.White },
+            new Queen{ Color = PieceColor.White },
+            new King{ Color = PieceColor.White },
+            new Pawn{ Color = PieceColor.Black },
+            new Knight{ Color = PieceColor.Black },
+            new Bishop{ Color = PieceColor.Black },
+            new Rook{ Color = PieceColor.Black },
+            new Queen{ Color = PieceColor.Black },
+            new King{ Color = PieceColor.Black },
+        };
+
+        public static T Get<T>(PieceColor color) where T : Piece
+        {
+            return _collection.Single(x => x is T && x.Color == color) as T;
+        }
+
+        #endregion
+
         public PieceColor Color { get; set; }
+
         public override string ToString() => PieceParser.ToString(this);
         public static Piece Parse(char value, PieceColor color) => PieceParser.Parse(value, color);
         public static Piece Parse(char value) => PieceParser.Parse(value);

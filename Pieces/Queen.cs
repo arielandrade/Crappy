@@ -5,6 +5,7 @@ namespace Crappy.Pieces
 {
     public class Queen : Piece
     {
+        internal Queen(){}
         public static IEnumerable<(int x, int y)> Directions => 
             Bishop.Directions.Concat(Rook.Directions);
             

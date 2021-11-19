@@ -36,6 +36,14 @@ namespace Crappy
                 null;
         }
 
+        private static readonly IEnumerable<(BoardCoordinates coordinates, Piece flag)> _castlingFlags = new List<(BoardCoordinates coordinates, Piece flag)>
+        {
+            (BoardCoordinates.Parse("a1"), Piece.Get<Queen>(PieceColor.White)),
+            (BoardCoordinates.Parse("a8"), Piece.Get<Queen>(PieceColor.Black)),
+            (BoardCoordinates.Parse("h1"), Piece.Get<King>(PieceColor.White)),
+            (BoardCoordinates.Parse("h8"), Piece.Get<King>(PieceColor.Black))
+        };
+
         /// <summary>
         /// Returns the castling flags removed in case that this is the movement of a rook, its capture, or the movement of a 
         /// king.
@@ -43,16 +51,8 @@ namespace Crappy
         /// <returns></returns>
         public IEnumerable<Piece> GetCastlingFlagsRemoved()
         {
-            var flags = new (BoardCoordinates coordinates, Piece flag)[]
-            {
-                (BoardCoordinates.Parse("a1"), new Queen { Color = PieceColor.White } ),
-                (BoardCoordinates.Parse("a8"), new Queen { Color = PieceColor.Black } ),
-                (BoardCoordinates.Parse("h1"), new King { Color = PieceColor.White } ),
-                (BoardCoordinates.Parse("h8"), new King { Color = PieceColor.Black } )
-            };
-
             return
-                flags.
+                _castlingFlags.
                 Where(x =>
                     Sources.
                     Select(source => source.Coordinates).
@@ -67,8 +67,8 @@ namespace Crappy
                         x is King ?
                         new Piece[]
                         {
-                            new King { Color = x.Color },
-                            new Queen { Color = x.Color }
+                            Piece.Get<King>(x.Color),
+                            Piece.Get<Queen>(x.Color)
                         } :
                         new Piece[] {} ));
         }

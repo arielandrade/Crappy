@@ -42,15 +42,7 @@ namespace Crappy
                 if (move.Color != SideToMove)
                     throw new ArgumentException($"Cannot apply a {move.Color} move in {SideToMove} side to move.");
 
-                bool isCapture = move.
-                    Targets.
-                    Where(x => x.Piece != null).
-                    Any(
-                        x =>
-                        {
-                            Piece piece = GetPieceAt(x.Coordinates);
-                            return piece != null && piece.Color != x.Piece.Color;
-                        });
+                bool isCapture = move.IsCapture(this);
 
                 //Clear sources
                 foreach (BoardCoordinates coordinates in move.Sources.Select(x => x.Coordinates))
@@ -73,7 +65,7 @@ namespace Crappy
                 EnPassantTarget = move.GetEnPassantTarget();
 
                 //Half move clock is reset on captures, pawn moves, and moves that remove a castling right. Incremented otherwise.
-                HalfmoveClock =
+                HalfmoveClock =                   
                     isCapture || move.Sources.Any(x => x.Piece is Pawn) || castlingFlagsChanged ? 0 : HalfmoveClock + 1;
 
                 if (SideToMove == PieceColor.White)
@@ -93,7 +85,7 @@ namespace Crappy
         public override string ToString() => FEN.ToString(this);
         public Position Clone() => FEN.Parse(ToString());
         public Piece GetPieceAt(BoardCoordinates coordinates) => Board[coordinates.RankIndex][coordinates.ColumnIndex];
-        
+       
         public Position PlayMove(Move move)
         {
             Position result = Clone();
@@ -117,7 +109,8 @@ namespace Crappy
                             RankIndex = rankIndex,
                             ColumnIndex = columnIndex
                         })).
-                    Where(x => x.Piece != null));
+                    Where(x => x.Piece != null)).
+                    ToList();
 
         private IEnumerable<BoardCoordinates> GetAllCoordinatesForPiece(Piece source) =>
             GetAllPieces().
@@ -134,8 +127,7 @@ namespace Crappy
             GetAllPieces().
             SelectMany(x => x.Piece.GetAllMoves(this, x.Coordinates));
 
-        public IEnumerable<Move> GetLegalMoves() => 
-            GetLegalMoves(SideToMove);
+        public IEnumerable<Move> GetLegalMoves() => GetLegalMoves(SideToMove);
 
         private IEnumerable<Move> GetLegalMoves(PieceColor color) =>
             GetAllPieces().
@@ -173,10 +165,7 @@ namespace Crappy
             GetAllMoves(attackingColor).
             Any(move => move.Targets.Any(target => target.Coordinates == coordinates));
 
-        public bool IsKingInCheck(PieceColor color) => 
-            IsSquareAttacked(
-                GetAllCoordinatesForPiece(new King { Color = color }).Single(), 
-                color.Toggle());
+        public bool IsKingInCheck(PieceColor color) => IsSquareAttacked(GetAllCoordinatesForPiece(Piece.Get<King>(color)).Single(), color.Toggle());
 
         /// <summary>
         /// ONLY checks that:
@@ -193,7 +182,7 @@ namespace Crappy
 
                 void SingleKing(PieceColor color)
                 {
-                    if (GetAllCoordinatesForPiece(new King { Color = color }).SingleOrDefault() is null)
+                    if (GetAllCoordinatesForPiece(Piece.Get<King>(color)).SingleOrDefault() is null)
                         throw new Exception($"No single {color} king found in {this}");
                 }
                 SingleKing(PieceColor.White);
@@ -225,8 +214,7 @@ namespace Crappy
             }
         }
 
-        public bool IsCheckMate() => 
-            IsKingInCheck(SideToMove) && !GetLegalMoves().Any();
+        public bool IsCheckMate() => IsKingInCheck(SideToMove) && !GetLegalMoves().Any();
 
         public bool IsDraw() => 
             HalfmoveClock == 100 || 

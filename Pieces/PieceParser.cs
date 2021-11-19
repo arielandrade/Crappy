@@ -33,17 +33,25 @@ namespace Crappy.Pieces
         public static Piece Parse(char piece) => 
             Parse(piece, char.IsUpper(piece) ? PieceColor.White : PieceColor.Black);
 
+        //Hacelo genérico y te ganás un choripán
         public static Piece Parse(char piece, PieceColor color)
         {
-            if (_pieceTypes.TryGetValue($"{piece}".ToLower(), out Type type))
+            switch($"{piece}".ToLower())
             {
-                Piece result = Activator.CreateInstance(type) as Piece;
-                result.Color = color;
-                return result;
-            }
-            else
-            {
-                throw new ArgumentException($"Invalid piece: {piece}");
+                case "p":
+                    return Piece.Get<Pawn>(color);
+                case "n":
+                    return Piece.Get<Knight>(color);
+                case "b":
+                    return Piece.Get<Bishop>(color);
+                case "r":
+                    return Piece.Get<Rook>(color);
+                case "q":
+                    return Piece.Get<Queen>(color);
+                case "k":
+                    return Piece.Get<King>(color);
+                default:
+                    throw new ArgumentException($"Invalid piece: {piece}");
             }
         }
 

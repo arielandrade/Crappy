@@ -4,6 +4,7 @@ namespace Crappy.Pieces
 {
     public class Knight : Piece
     {
+        internal Knight(){}
         public static IEnumerable<(int x, int y)> Directions = new[]
         {
             (-2, 1), //Left top

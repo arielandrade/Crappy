@@ -5,6 +5,7 @@ namespace Crappy.Pieces
 {
     public class King : Piece
     {
+        internal King(){}
         public static IEnumerable<(int x, int y)> Directions => Bishop.Directions.Concat(Rook.Directions);
 
         private Move GetCastlingMoveBySide(Position position, BoardCoordinates kingSourceCoordinates, Piece side)
@@ -48,12 +49,12 @@ namespace Crappy.Pieces
                         Sources = new[]
                         {
                             (kingSourceCoordinates, this as Piece),
-                            (rookSourceCoordinates, new Rook { Color = Color }),
+                            (rookSourceCoordinates, Get<Rook>(Color)),
                         },
                         Targets = new[]
                         {
                             (kingTargetCoordinates, this as Piece),
-                            (rookTargetCoordinates, new Rook { Color = Color })
+                            (rookTargetCoordinates, Get<Rook>(Color))
                         }
                     };
                 }
@@ -64,7 +65,7 @@ namespace Crappy.Pieces
 
         private IEnumerable<Move> GetCastlingMoves(Position position, BoardCoordinates sourceCoordinates)
         {
-            foreach (var side in new Piece[] { this, new Queen { Color = Color } })
+            foreach (var side in new Piece[] { this, Get<Queen>(Color) })
             {
                 Move castling = GetCastlingMoveBySide(position, sourceCoordinates, side);
 

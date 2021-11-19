@@ -4,6 +4,8 @@ namespace Crappy.Pieces
 {
     public class Bishop : Piece
     {
+        internal Bishop(){}
+        
         public static IEnumerable<(int x, int y)> Directions = new[]
         {
             (-1, 1), //Up left

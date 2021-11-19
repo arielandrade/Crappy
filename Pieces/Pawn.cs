@@ -5,6 +5,8 @@ namespace Crappy.Pieces
 {
     public class Pawn : Piece
     {
+        internal Pawn(){}
+
         /// <summary>
         /// Returns the promotion pieces or a pawn depending on the target's rank
         /// </summary>
@@ -17,10 +19,10 @@ namespace Crappy.Pieces
                 targetRankIndex == (Color == PieceColor.White ? 7 : 0) ?
                 new Piece[]
                 {
-                    new Knight { Color = Color },
-                    new Bishop { Color = Color },
-                    new Rook { Color = Color },
-                    new Queen { Color = Color },
+                    Get<Knight>(Color),
+                    Get<Bishop>(Color),
+                    Get<Rook>(Color),
+                    Get<Queen>(Color),
                 } :
                 new Piece[] { this };
         }
