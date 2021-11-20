@@ -8,36 +8,17 @@ namespace Crappy.Pieces
         internal King(){}
         public static IEnumerable<(int x, int y)> Directions => Bishop.Directions.Concat(Rook.Directions);
 
-        private Move GetCastlingMoveBySide(Position position, BoardCoordinates kingSourceCoordinates, Piece side)
+        private Move GetCastlingMoveBySide(Position position, Coordinates kingSourceCoordinates, Piece side)
         {
             PieceColor oppositeColor = Color.Toggle();
 
             if (position.CastlingFlags.Contains(side) && 
                 !position.IsCastlePreventedAtCoordinates(kingSourceCoordinates, oppositeColor))
             {
-                var kingTargetCoordinates = new BoardCoordinates
-                {
-                    ColumnIndex = side is King ? 6 : 2,
-                    RankIndex = kingSourceCoordinates.RankIndex
-                };
-
-                var rookSourceCoordinates = new BoardCoordinates
-                {
-                    ColumnIndex = side is King ? 7 : 0,
-                    RankIndex = kingSourceCoordinates.RankIndex
-                };
-
-                var rookTargetCoordinates = new BoardCoordinates
-                {
-                    ColumnIndex = side is King ? 5 : 3,
-                    RankIndex = kingSourceCoordinates.RankIndex
-                };
-
-                var queenKnightCoordinates = new BoardCoordinates
-                {
-                    ColumnIndex = 1,
-                    RankIndex = kingSourceCoordinates.RankIndex
-                };
+                var kingTargetCoordinates = Coordinates.Get(rank: kingSourceCoordinates.RankIndex, column: side is King ? 6 : 2);
+                var rookSourceCoordinates = Coordinates.Get(rank: kingSourceCoordinates.RankIndex, column: side is King ? 7 : 0);
+                var rookTargetCoordinates = Coordinates.Get(rank: kingSourceCoordinates.RankIndex, column: side is King ? 5 : 3);
+                var queenKnightCoordinates = Coordinates.Get(rank: kingSourceCoordinates.RankIndex, column: 1);
 
                 if (position.GetPieceAt(rookTargetCoordinates) is null &&
                     position.GetPieceAt(kingTargetCoordinates) is null &&
@@ -63,7 +44,7 @@ namespace Crappy.Pieces
             return null;
         }
 
-        private IEnumerable<Move> GetCastlingMoves(Position position, BoardCoordinates sourceCoordinates)
+        private IEnumerable<Move> GetCastlingMoves(Position position, Coordinates sourceCoordinates)
         {
             foreach (var side in new Piece[] { this, Get<Queen>(Color) })
             {
@@ -74,7 +55,7 @@ namespace Crappy.Pieces
             }
         }
 
-        public override IEnumerable<Move> GetAllMoves(Position position, BoardCoordinates sourceCoordinates) =>
+        public override IEnumerable<Move> GetAllMoves(Position position, Coordinates sourceCoordinates) =>
             GetSweepMoves(position, sourceCoordinates, Directions, length: 1).
             Concat(GetCastlingMoves(position, sourceCoordinates));
     }

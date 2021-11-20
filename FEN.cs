@@ -108,8 +108,8 @@ namespace Crappy
                 {
                     Board = GetSquares(fields[0]),
                     SideToMove = GetSideToMove(fields[1]),
-                    CastlingFlags = GetCastlingFlags(fields[2]),
-                    EnPassantTarget = BoardCoordinates.TryParse(fields[3]),
+                    CastlingFlags = fields[2] == "-" ? new Piece[]{} : GetCastlingFlags(fields[2]),
+                    EnPassantTarget = fields[3] == "-" ? null : Coordinates.TryParse(fields[3]),
                     HalfmoveClock = halfmoveClock,
                     FullmoveClock = fullmoveClock,
                 };

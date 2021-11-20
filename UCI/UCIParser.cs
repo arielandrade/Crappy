@@ -16,8 +16,8 @@ namespace Crappy.UCI
                 if (!new[] { 4, 5 }.Contains(move.Length))
                     throw new ArgumentException($"Invalid move length: {move.Length}");
 
-                BoardCoordinates firstSource = BoardCoordinates.Parse(move.Substring(0, 2));
-                BoardCoordinates firstTarget = BoardCoordinates.Parse(move.Substring(2, 2));
+                Coordinates firstSource = Coordinates.Parse(move.Substring(0, 2));
+                Coordinates firstTarget = Coordinates.Parse(move.Substring(2, 2));
                 Piece promotion = move.Length == 5 ? Piece.Parse(move[4], position.SideToMove) : null;
 
                 return

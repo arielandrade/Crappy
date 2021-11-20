@@ -17,20 +17,20 @@ namespace Crappy
         public Piece[][] Board { get; set; }
         public PieceColor SideToMove { get; set; }
         public IEnumerable<Piece> CastlingFlags { get; set; }
-        public BoardCoordinates EnPassantTarget { get; set; }
+        public Coordinates EnPassantTarget { get; set; }
         public int HalfmoveClock { get; set; }
         public int FullmoveClock { get; set; }
-        private IEnumerable<(Piece Piece, BoardCoordinates Coordinates)> allPieces;
+        private IEnumerable<(Piece Piece, Coordinates Coordinates)> allPieces;
 
         #endregion Fields
 
         #region Mutable
-        public void SetSquare(BoardCoordinates coordinates, Piece piece)
+        public void SetSquare(Coordinates coordinates, Piece piece)
         {
             Board[coordinates.RankIndex][coordinates.ColumnIndex] = piece;
         }
 
-        private void ClearSquare(BoardCoordinates coordinates) => SetSquare(coordinates, null);
+        private void ClearSquare(Coordinates coordinates) => SetSquare(coordinates, null);
 
         private void ApplyMove(Move move)
         {
@@ -45,13 +45,13 @@ namespace Crappy
                 bool isCapture = move.IsCapture(this);
 
                 //Clear sources
-                foreach (BoardCoordinates coordinates in move.Sources.Select(x => x.Coordinates))
+                foreach (Coordinates coordinates in move.Sources.Select(x => x.Coordinates))
                 {
                     ClearSquare(coordinates);
                 }
 
                 //Set targets
-                foreach ((BoardCoordinates coordinates, Piece piece) in move.Targets)
+                foreach ((Coordinates coordinates, Piece piece) in move.Targets)
                 {
                     SetSquare(coordinates, piece);
                 }
@@ -84,7 +84,7 @@ namespace Crappy
         
         public override string ToString() => FEN.ToString(this);
         public Position Clone() => FEN.Parse(ToString());
-        public Piece GetPieceAt(BoardCoordinates coordinates) => Board[coordinates.RankIndex][coordinates.ColumnIndex];
+        public Piece GetPieceAt(Coordinates coordinates) => Board[coordinates.RankIndex][coordinates.ColumnIndex];
        
         public Position PlayMove(Move move)
         {
@@ -95,7 +95,7 @@ namespace Crappy
 
         #endregion Immutable
 
-        public IEnumerable<(Piece Piece, BoardCoordinates Coordinates)> GetAllPieces() =>
+        public IEnumerable<(Piece Piece, Coordinates Coordinates)> GetAllPieces() =>
             allPieces = allPieces ??
                 Board.
                 SelectMany(
@@ -103,16 +103,11 @@ namespace Crappy
                     rank.
                     Select(
                         (piece, columnIndex) =>
-                        (Piece: piece,
-                        Coordinates: new BoardCoordinates
-                        {
-                            RankIndex = rankIndex,
-                            ColumnIndex = columnIndex
-                        })).
+                        (Piece: piece, Coordinates: Coordinates.Get(rankIndex, columnIndex))).
                     Where(x => x.Piece != null)).
                     ToList();
 
-        private IEnumerable<BoardCoordinates> GetAllCoordinatesForPiece(Piece source) =>
+        private IEnumerable<Coordinates> GetAllCoordinatesForPiece(Piece source) =>
             GetAllPieces().
             Where(x => x.Piece == source).
             Select(x => x.Coordinates);
@@ -134,7 +129,7 @@ namespace Crappy
             Where(x => x.Piece.Color == color).
             SelectMany(x => GetLegalMovesForPiece(x.Piece, x.Coordinates));
 
-        private IEnumerable<Move> GetLegalMovesForPiece(Piece piece, BoardCoordinates coordinates) =>
+        private IEnumerable<Move> GetLegalMovesForPiece(Piece piece, Coordinates coordinates) =>
             piece.
             GetAllMoves(this, coordinates).
             Where(x => PlayMove(x).IsLegal());
@@ -147,7 +142,7 @@ namespace Crappy
         /// <param name="coordinates"></param>
         /// <param name="attackingColor"></param>
         /// <returns></returns>
-        public bool IsCastlePreventedAtCoordinates(BoardCoordinates coordinates, PieceColor attackingColor) =>
+        public bool IsCastlePreventedAtCoordinates(Coordinates coordinates, PieceColor attackingColor) =>
             GetAllPieces().
             Where(x => x.Piece.Color == attackingColor && !(x.Piece is King)).
             Any(
@@ -161,7 +156,7 @@ namespace Crappy
         /// <param name="coordinates"></param>
         /// <param name="attackingColor"></param>
         /// <returns></returns>
-        private bool IsSquareAttacked(BoardCoordinates coordinates, PieceColor attackingColor) =>
+        private bool IsSquareAttacked(Coordinates coordinates, PieceColor attackingColor) =>
             GetAllMoves(attackingColor).
             Any(move => move.Targets.Any(target => target.Coordinates == coordinates));
 
@@ -176,42 +171,41 @@ namespace Crappy
         /// <returns></returns>
         private bool IsLegal()
         {
-            try
-            {
-                #region One king of each color
+            #region One king of each color
 
-                void SingleKing(PieceColor color)
-                {
-                    if (GetAllCoordinatesForPiece(Piece.Get<King>(color)).SingleOrDefault() is null)
-                        throw new Exception($"No single {color} king found in {this}");
-                }
-                SingleKing(PieceColor.White);
-                SingleKing(PieceColor.Black);
+            bool SingleKing(PieceColor color) => GetAllCoordinatesForPiece(Piece.Get<King>(color)).SingleOrDefault() != null;
 
-                #endregion
-
-                #region No pawns at first or eight rank
-
-                if (GetAllPieces().Any(x => x.Piece is Pawn && new[] { 0, 7 }.Contains(x.Coordinates.RankIndex)))
-                    throw new Exception($"Invalid pawn rank in {this}");
-
-                #endregion
-
-                #region No checks in opposite king         
-
-                if (IsKingInCheck(SideToMove.Toggle()))
-                {
-                    throw new Exception($"Opposite king already in check in {this}");
-                }
-
-                #endregion
-
-                return true;
-            }
-            catch
+            if (!SingleKing(PieceColor.White))
             {
                 return false;
             }
+            
+            if (!SingleKing(PieceColor.Black))
+            {
+                return false;
+            }
+
+            #endregion
+
+            #region No pawns at first or eight rank
+
+            if (GetAllPieces().Any(x => x.Piece is Pawn && new[] { 0, 7 }.Contains(x.Coordinates.RankIndex)))
+            {
+                return false;
+            }
+
+            #endregion
+
+            #region No checks in opposite king         
+
+            if (IsKingInCheck(SideToMove.Toggle()))
+            {
+                return false;
+            }
+
+            #endregion
+
+            return true;
         }
 
         public bool IsCheckMate() => IsKingInCheck(SideToMove) && !GetLegalMoves().Any();

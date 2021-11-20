@@ -14,7 +14,7 @@ namespace Crappy.Pieces
             (1, -1), //Bottom right
         };
 
-        public override IEnumerable<Move> GetAllMoves(Position position, BoardCoordinates sourceCoordinates) => 
+        public override IEnumerable<Move> GetAllMoves(Position position, Coordinates sourceCoordinates) => 
             GetSweepMoves(position, sourceCoordinates, Directions, length: 7);
     }
 }

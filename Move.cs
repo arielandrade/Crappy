@@ -12,36 +12,32 @@ namespace Crappy
         /// Coordinates to clear and source pieces to determine promotion in case the fist source is a different 
         /// than the first target.
         /// </summary>
-        public (BoardCoordinates Coordinates, Piece Piece)[] Sources { get; set; }
+        public (Coordinates Coordinates, Piece Piece)[] Sources { get; set; }
 
         /// <summary>
         /// Pieces to set.
         /// </summary>
-        public (BoardCoordinates Coordinates, Piece Piece)[] Targets { get; set; }
+        public (Coordinates Coordinates, Piece Piece)[] Targets { get; set; }
 
         public bool IsPromotion => Sources.First().Piece != Targets.First().Piece;
         public PieceColor Color => Sources.First().Piece.Color;
 
-        public BoardCoordinates GetEnPassantTarget()
+        public Coordinates GetEnPassantTarget()
         {
-            (BoardCoordinates sourceCoordinates, Piece sourcePiece) = Sources.First();
+            (Coordinates sourceCoordinates, Piece sourcePiece) = Sources.First();
 
             return
                 sourcePiece is Pawn && Math.Abs(sourceCoordinates.RankIndex - Targets.First().Coordinates.RankIndex) == 2 ?
-                new BoardCoordinates
-                {
-                    ColumnIndex = sourceCoordinates.ColumnIndex,
-                    RankIndex = sourceCoordinates.RankIndex + sourcePiece.Color.Sign()
-                } :
+                Coordinates.Get(sourceCoordinates.RankIndex + sourcePiece.Color.Sign(), sourceCoordinates.ColumnIndex) :
                 null;
         }
 
-        private static readonly IEnumerable<(BoardCoordinates coordinates, Piece flag)> _castlingFlags = new List<(BoardCoordinates coordinates, Piece flag)>
+        private static readonly IEnumerable<(Coordinates coordinates, Piece flag)> _castlingFlags = new List<(Coordinates coordinates, Piece flag)>
         {
-            (BoardCoordinates.Parse("a1"), Piece.Get<Queen>(PieceColor.White)),
-            (BoardCoordinates.Parse("a8"), Piece.Get<Queen>(PieceColor.Black)),
-            (BoardCoordinates.Parse("h1"), Piece.Get<King>(PieceColor.White)),
-            (BoardCoordinates.Parse("h8"), Piece.Get<King>(PieceColor.Black))
+            (Coordinates.Parse("a1"), Piece.Get<Queen>(PieceColor.White)),
+            (Coordinates.Parse("a8"), Piece.Get<Queen>(PieceColor.Black)),
+            (Coordinates.Parse("h1"), Piece.Get<King>(PieceColor.White)),
+            (Coordinates.Parse("h8"), Piece.Get<King>(PieceColor.Black))
         };
 
         /// <summary>

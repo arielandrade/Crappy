@@ -27,15 +27,13 @@ namespace Crappy.Pieces
                 new Piece[] { this };
         }
 
-        private IEnumerable<Move> GetPushMoves(Position position, BoardCoordinates sourceCoordinates)
+        private IEnumerable<Move> GetPushMoves(Position position, Coordinates sourceCoordinates)
         {
             var sources = new[] { (sourceCoordinates, this as Piece) };
 
-            var singleAdvanceTarget = new BoardCoordinates
-            {
-                RankIndex = sourceCoordinates.RankIndex + (Color == PieceColor.White ? 1 : -1),
-                ColumnIndex = sourceCoordinates.ColumnIndex
-            };
+            var singleAdvanceTarget = Coordinates.Get(
+                rank: sourceCoordinates.RankIndex + (Color == PieceColor.White ? 1 : -1), 
+                column: sourceCoordinates.ColumnIndex);
 
             if (position.GetPieceAt(singleAdvanceTarget) is null)
             {
@@ -51,11 +49,9 @@ namespace Crappy.Pieces
                 #endregion
 
                 #region Double advance
-                var doubleAdvanceTarget = new BoardCoordinates
-                {
-                    RankIndex = sourceCoordinates.RankIndex + (Color == PieceColor.White ? 2 : -2),
-                    ColumnIndex = sourceCoordinates.ColumnIndex
-                };
+                var doubleAdvanceTarget = Coordinates.Get(
+                    rank: sourceCoordinates.RankIndex + (Color == PieceColor.White ? 2 : -2), 
+                    column: sourceCoordinates.ColumnIndex);
 
                 if (sourceCoordinates.RankIndex == (Color == PieceColor.White ? 1 : 6) && 
                     position.GetPieceAt(doubleAdvanceTarget) is null)
@@ -70,30 +66,24 @@ namespace Crappy.Pieces
             }
         }
 
-        private IEnumerable<Move> GetCaptureMoves(Position position, BoardCoordinates sourceCoordinates)
+        private IEnumerable<Move> GetCaptureMoves(Position position, Coordinates sourceCoordinates)
         {
             var sources = new[] { (sourceCoordinates, this as Piece) };
 
             foreach (int columnOffset in new[] { -1, 1 })
             {
-                var targetCoordinates = new BoardCoordinates
-                {
-                    RankIndex = sourceCoordinates.RankIndex + (Color == PieceColor.White ? 1 : -1),
-                    ColumnIndex = sourceCoordinates.ColumnIndex + columnOffset
-                };
+                var targetCoordinates = Coordinates.Get(
+                    rank: sourceCoordinates.RankIndex + (Color == PieceColor.White ? 1 : -1), 
+                    column: sourceCoordinates.ColumnIndex + columnOffset);
 
-                if (targetCoordinates.IsValid())
+                if (targetCoordinates != null)
                 {
                     #region En passant capture
                     if (targetCoordinates == position.EnPassantTarget && 
                         ((targetCoordinates.RankIndex == 5 && Color == PieceColor.White) ||
                          (targetCoordinates.RankIndex == 2 && Color == PieceColor.Black)))
                     {
-                        var capturedPawnCoordinates = new BoardCoordinates
-                        {
-                            RankIndex = sourceCoordinates.RankIndex,
-                            ColumnIndex = targetCoordinates.ColumnIndex
-                        };
+                        var capturedPawnCoordinates = Coordinates.Get(sourceCoordinates.RankIndex, targetCoordinates.ColumnIndex);
 
                         yield return new Move
                         {
@@ -126,7 +116,7 @@ namespace Crappy.Pieces
             }
         }
 
-        public override IEnumerable<Move> GetAllMoves(Position position, BoardCoordinates sourceCoordinates) =>
+        public override IEnumerable<Move> GetAllMoves(Position position, Coordinates sourceCoordinates) =>
             GetPushMoves(position, sourceCoordinates).
             Concat(GetCaptureMoves(position, sourceCoordinates));
     }
