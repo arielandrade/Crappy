@@ -243,7 +243,7 @@ namespace Crappy
             //Checkmate
             if (position.IsCheckMate())
             {
-                WriteInfo($"MATE FOUND IN {position}");
+                WriteInfo($"MATE FOUND FOR {position.SideToMove.Toggle().ToString().ToUpper()} IN {position}");
                 return -MAX_SCORE;
             }
 
