@@ -9,7 +9,32 @@ namespace Crappy.Pieces
     /// </summary>
     public abstract class Piece
     {
+        #region Static
+        private static readonly IEnumerable<Piece> _collection = new List<Piece>
+        {
+            new Pawn{ Color = PieceColor.White },
+            new Knight{ Color = PieceColor.White },
+            new Bishop{ Color = PieceColor.White },
+            new Rook{ Color = PieceColor.White },
+            new Queen{ Color = PieceColor.White },
+            new King{ Color = PieceColor.White },
+            new Pawn{ Color = PieceColor.Black },
+            new Knight{ Color = PieceColor.Black },
+            new Bishop{ Color = PieceColor.Black },
+            new Rook{ Color = PieceColor.Black },
+            new Queen{ Color = PieceColor.Black },
+            new King{ Color = PieceColor.Black },
+        };
+
+        public static T Get<T>(PieceColor color) where T : Piece
+        {
+            return _collection.Single(x => x is T && x.Color == color) as T;
+        }
+
+        #endregion
+
         public PieceColor Color { get; set; }
+
         public override string ToString() => PieceParser.ToString(this);
         public static Piece Parse(char value, PieceColor color) => PieceParser.Parse(value, color);
         public static Piece Parse(char value) => PieceParser.Parse(value);
@@ -26,7 +51,7 @@ namespace Crappy.Pieces
         /// <param name="position"></param>
         /// <param name="sourceCoordinates"></param>
         /// <returns></returns>
-        public abstract IEnumerable<Move> GetAllMoves(Position position, BoardCoordinates sourceCoordinates);
+        public abstract IEnumerable<Move> GetAllMoves(Position position, Coordinates sourceCoordinates);
 
         /// <summary>
         /// Sweep in all directions specified while incrementing a distance until reaching the length specified, or finding a 
@@ -37,7 +62,7 @@ namespace Crappy.Pieces
         /// <returns></returns>
         protected IEnumerable<Move> GetSweepMoves(
             Position position, 
-            BoardCoordinates sourceCoordinates, 
+            Coordinates sourceCoordinates, 
             IEnumerable<(int x, int y)> directions, 
             int length)
         {
@@ -45,13 +70,9 @@ namespace Crappy.Pieces
             {
                 foreach (int distance in Enumerable.Range(1, length))
                 {
-                    var targetCoordinates = new BoardCoordinates
-                    {
-                        ColumnIndex = sourceCoordinates.ColumnIndex + x * distance,
-                        RankIndex = sourceCoordinates.RankIndex + y * distance
-                    };
+                    var targetCoordinates = Coordinates.Get(rank: sourceCoordinates.RankIndex + y * distance, column: sourceCoordinates.ColumnIndex + x * distance);
 
-                    if (targetCoordinates.IsValid())
+                    if (targetCoordinates != null)
                     {
                         Piece piece = position.GetPieceAt(targetCoordinates);
 

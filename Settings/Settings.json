@@ -1,7 +1,6 @@
 [
 	{
 		"settingtype": "Randomness",
-		"name": "randomness",
 		"optiontype": "Spin",
 		"value": 1,
 		"minimum": 0,
@@ -10,7 +9,6 @@
 	},
 	{
 		"settingtype": "LogToFile",
-		"name": "logtofile",
 		"optiontype": "Check",
 		"value": "false",
 		"default": "false"

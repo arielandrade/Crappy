@@ -254,7 +254,7 @@ namespace Crappy.UCI
             {
                 try
                 {
-                    Setting setting = Configuration.Get().Settings.Values.SingleOrDefault(x => x.SettingType.ToString() == settingName);
+                    Setting setting = Configuration.Get().Settings.Values.SingleOrDefault(x => x.SettingType.ToString().ToLower() == settingName);
 
                     if (setting is null)
                     {
