@@ -1,6 +1,6 @@
 ﻿namespace Crappy.Pieces
 {
-    public static class PieceColorHelper
+    internal static class PieceColorHelper
     {
         public static PieceColor Toggle(this PieceColor color) =>
             color == PieceColor.White ? 
